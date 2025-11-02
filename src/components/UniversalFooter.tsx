@@ -122,19 +122,22 @@ export function UniversalFooter({
                 <div className="bg-slate-50 border border-slate-200 rounded p-4">
                   <h4 className="font-semibold text-slate-900 mb-3">Stands</h4>
                   <div className="space-y-2">
-                    {orderData.stands.map((stand, index) => (
-                      <div key={index} className="flex justify-between items-start text-sm">
-                        <div className="flex-1">
-                          <div className="font-medium text-slate-900">{stand.name}</div>
-                          <div className="text-slate-600">
-                            {stand.hasOwn ? 'No charge' : `$${stand.unitPrice.toFixed(2)} × ${stand.quantity}`}
+                    {orderData.stands.map((stand, index) => {
+                      const standName = stand.name.toLowerCase().includes('stand') ? stand.name : `${stand.name} Tree Stand`;
+                      return (
+                        <div key={index} className="flex justify-between items-start text-sm">
+                          <div className="flex-1">
+                            <div className="font-medium text-slate-900">{standName}</div>
+                            <div className="text-slate-600">
+                              {stand.hasOwn ? 'No charge' : `$${stand.unitPrice.toFixed(2)} × ${stand.quantity}`}
+                            </div>
+                          </div>
+                          <div className="font-semibold text-slate-900">
+                            ${(stand.unitPrice * stand.quantity).toFixed(2)}
                           </div>
                         </div>
-                        <div className="font-semibold text-slate-900">
-                          ${(stand.unitPrice * stand.quantity).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="pt-2 border-t border-slate-300 flex justify-between text-sm font-semibold">
                       <span>Stands Subtotal</span>
                       <span>${standsTotal.toFixed(2)}</span>
@@ -147,19 +150,22 @@ export function UniversalFooter({
                 <div className="bg-slate-50 border border-slate-200 rounded p-4">
                   <h4 className="font-semibold text-slate-900 mb-3">Wreaths</h4>
                   <div className="space-y-2">
-                    {orderData.wreaths.map((wreath, index) => (
-                      <div key={index} className="flex justify-between items-start text-sm">
-                        <div className="flex-1">
-                          <div className="font-medium text-slate-900">{wreath.size}</div>
-                          <div className="text-slate-600">
-                            ${wreath.unitPrice.toFixed(2)} × {wreath.quantity}
+                    {orderData.wreaths.map((wreath, index) => {
+                      const wreathName = `${wreath.size.charAt(0).toUpperCase() + wreath.size.slice(1)} Wreath`;
+                      return (
+                        <div key={index} className="flex justify-between items-start text-sm">
+                          <div className="flex-1">
+                            <div className="font-medium text-slate-900">{wreathName}</div>
+                            <div className="text-slate-600">
+                              ${wreath.unitPrice.toFixed(2)} × {wreath.quantity}
+                            </div>
+                          </div>
+                          <div className="font-semibold text-slate-900">
+                            ${(wreath.unitPrice * wreath.quantity).toFixed(2)}
                           </div>
                         </div>
-                        <div className="font-semibold text-slate-900">
-                          ${(wreath.unitPrice * wreath.quantity).toFixed(2)}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     <div className="pt-2 border-t border-slate-300 flex justify-between text-sm font-semibold">
                       <span>Wreaths Subtotal</span>
                       <span>${wreathsTotal.toFixed(2)}</span>

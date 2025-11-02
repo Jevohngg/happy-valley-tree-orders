@@ -214,19 +214,22 @@ export function ReviewStep({ orderData, onConfirm, onSubmitReady, onSubmittingCh
               <div className="bg-slate-50 border rounded border-slate-200 p-4">
                 <h3 className="font-semibold text-slate-900 mb-3">Stands</h3>
                 <div className="space-y-3">
-                  {orderData.stands.map((stand, index) => (
-                    <div key={index} className="flex justify-between items-start text-sm">
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{stand.name}</div>
-                        <div className="text-slate-600">
-                          {stand.hasOwn ? 'No charge' : `$${stand.unitPrice.toFixed(2)} × ${stand.quantity}`}
+                  {orderData.stands.map((stand, index) => {
+                    const standName = stand.name.toLowerCase().includes('stand') ? stand.name : `${stand.name} Tree Stand`;
+                    return (
+                      <div key={index} className="flex justify-between items-start text-sm">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-900">{standName}</div>
+                          <div className="text-slate-600">
+                            {stand.hasOwn ? 'No charge' : `$${stand.unitPrice.toFixed(2)} × ${stand.quantity}`}
+                          </div>
+                        </div>
+                        <div className="font-semibold text-slate-900">
+                          ${(stand.unitPrice * stand.quantity).toFixed(2)}
                         </div>
                       </div>
-                      <div className="font-semibold text-slate-900">
-                        ${(stand.unitPrice * stand.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div className="pt-3 border-t border-slate-300 flex justify-between text-sm font-semibold">
                     <span>Stands Subtotal</span>
                     <span>${standsTotal.toFixed(2)}</span>
@@ -239,19 +242,22 @@ export function ReviewStep({ orderData, onConfirm, onSubmitReady, onSubmittingCh
               <div className="bg-slate-50 border rounded border-slate-200 p-4">
                 <h3 className="font-semibold text-slate-900 mb-3">Wreaths</h3>
                 <div className="space-y-3">
-                  {orderData.wreaths.map((wreath, index) => (
-                    <div key={index} className="flex justify-between items-start text-sm">
-                      <div className="flex-1">
-                        <div className="font-medium text-slate-900">{wreath.size}</div>
-                        <div className="text-slate-600">
-                          ${wreath.unitPrice.toFixed(2)} × {wreath.quantity}
+                  {orderData.wreaths.map((wreath, index) => {
+                    const wreathName = `${wreath.size.charAt(0).toUpperCase() + wreath.size.slice(1)} Wreath`;
+                    return (
+                      <div key={index} className="flex justify-between items-start text-sm">
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-900">{wreathName}</div>
+                          <div className="text-slate-600">
+                            ${wreath.unitPrice.toFixed(2)} × {wreath.quantity}
+                          </div>
+                        </div>
+                        <div className="font-semibold text-slate-900">
+                          ${(wreath.unitPrice * wreath.quantity).toFixed(2)}
                         </div>
                       </div>
-                      <div className="font-semibold text-slate-900">
-                        ${(wreath.unitPrice * wreath.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div className="pt-3 border-t border-slate-300 flex justify-between text-sm font-semibold">
                     <span>Wreaths Subtotal</span>
                     <span>${wreathsTotal.toFixed(2)}</span>
@@ -356,23 +362,29 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
 
               {orderData.stands.length > 0 && (
                 <div className="text-xs space-y-1">
-                  {orderData.stands.map((stand, index) => (
-                    <div key={index} className="flex justify-between text-slate-700">
-                      <span>{stand.name} × {stand.quantity}</span>
-                      <span className="font-medium">${(stand.unitPrice * stand.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
+                  {orderData.stands.map((stand, index) => {
+                    const standName = stand.name.toLowerCase().includes('stand') ? stand.name : `${stand.name} Tree Stand`;
+                    return (
+                      <div key={index} className="flex justify-between text-slate-700">
+                        <span>{standName} × {stand.quantity}</span>
+                        <span className="font-medium">${(stand.unitPrice * stand.quantity).toFixed(2)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 
               {orderData.wreaths.length > 0 && (
                 <div className="text-xs space-y-1">
-                  {orderData.wreaths.map((wreath, index) => (
-                    <div key={index} className="flex justify-between text-slate-700">
-                      <span>{wreath.size} × {wreath.quantity}</span>
-                      <span className="font-medium">${(wreath.unitPrice * wreath.quantity).toFixed(2)}</span>
-                    </div>
-                  ))}
+                  {orderData.wreaths.map((wreath, index) => {
+                    const wreathName = `${wreath.size.charAt(0).toUpperCase() + wreath.size.slice(1)} Wreath`;
+                    return (
+                      <div key={index} className="flex justify-between text-slate-700">
+                        <span>{wreathName} × {wreath.quantity}</span>
+                        <span className="font-medium">${(wreath.unitPrice * wreath.quantity).toFixed(2)}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
 

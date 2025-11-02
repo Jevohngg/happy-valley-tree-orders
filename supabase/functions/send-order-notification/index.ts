@@ -60,16 +60,20 @@ Deno.serve(async (req: Request) => {
     // Format stands list
     const standsList = orderDetails.stands
       .map(
-        (stand) =>
-          `  • ${stand.name} × ${stand.quantity}\n    $${stand.unitPrice.toFixed(2)} each = $${(stand.unitPrice * stand.quantity).toFixed(2)}`
+        (stand) => {
+          const standName = stand.name.toLowerCase().includes('stand') ? stand.name : `${stand.name} Tree Stand`;
+          return `  • ${standName} × ${stand.quantity}\n    $${stand.unitPrice.toFixed(2)} each = $${(stand.unitPrice * stand.quantity).toFixed(2)}`;
+        }
       )
       .join("\n");
 
     // Format wreaths list
     const wreathsList = orderDetails.wreaths
       .map(
-        (wreath) =>
-          `  • ${wreath.size} × ${wreath.quantity}\n    $${wreath.unitPrice.toFixed(2)} each = $${(wreath.unitPrice * wreath.quantity).toFixed(2)}`
+        (wreath) => {
+          const wreathName = `${wreath.size.charAt(0).toUpperCase() + wreath.size.slice(1)} Wreath`;
+          return `  • ${wreathName} × ${wreath.quantity}\n    $${wreath.unitPrice.toFixed(2)} each = $${(wreath.unitPrice * wreath.quantity).toFixed(2)}`;
+        }
       )
       .join("\n");
 
