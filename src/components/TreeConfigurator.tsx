@@ -161,7 +161,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
   return (
     <div className="min-h-screen bg-white pb-24">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="mb-3">
           <h1 className="text-2xl font-bold text-slate-900">{currentSpecies.name}</h1>
         </div>
