@@ -653,7 +653,7 @@ function StandsEditor({ stands, onUpdate }: { stands: Stand[]; onUpdate: () => v
     setEditedStands(stands);
   }, [stands]);
 
-  async function updateStand(standId: string, updates: { price?: number; fits_up_to_feet?: number | null; visible?: boolean }) {
+  async function updateStand(standId: string, updates: { title?: string; description?: string | null; price?: number; fits_up_to_feet?: number | null; visible?: boolean }) {
     // @ts-ignore - RLS types are overly strict
     const { error} = await supabase.from('stands').update(updates as any).eq('id', standId);
     if (!error) {
@@ -677,6 +677,7 @@ function StandsEditor({ stands, onUpdate }: { stands: Stand[]; onUpdate: () => v
 
     const { error } = await supabase.from('stands').insert({
       name: newStand.name,
+      title: newStand.name,
       price: newStand.price,
       fits_up_to_feet: newStand.fitsUpToFeet,
       sort_order: newStand.sortOrder,
@@ -782,6 +783,26 @@ function StandsEditor({ stands, onUpdate }: { stands: Stand[]; onUpdate: () => v
             </label>
           </div>
           <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Title (shown to customers)</label>
+              <input
+                type="text"
+                value={stand.title}
+                onChange={(e) => handleStandChange(stand.id, 'title', e.target.value)}
+                className="w-full px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder="e.g., Premium Tree Stand"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+              <textarea
+                value={stand.description || ''}
+                onChange={(e) => handleStandChange(stand.id, 'description', e.target.value)}
+                className="w-full px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                rows={2}
+                placeholder="Describe the stand features..."
+              />
+            </div>
             <div className="grid md:grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Price ($)</label>
@@ -808,7 +829,7 @@ function StandsEditor({ stands, onUpdate }: { stands: Stand[]; onUpdate: () => v
               onClick={() => {
                 const currentStand = editedStands.find(s => s.id === stand.id);
                 if (currentStand) {
-                  updateStand(stand.id, { price: currentStand.price, fits_up_to_feet: currentStand.fits_up_to_feet });
+                  updateStand(stand.id, { title: currentStand.title, description: currentStand.description, price: currentStand.price, fits_up_to_feet: currentStand.fits_up_to_feet });
                 }
               }}
               className="w-full px-4 py-2 bg-primary-700 text-white  hover:bg-primary-800 rounded transition-colors flex items-center justify-center gap-2 font-medium"
@@ -833,7 +854,7 @@ function WreathsEditor({ wreaths, onUpdate }: { wreaths: WreathType[]; onUpdate:
     setEditedWreaths(wreaths);
   }, [wreaths]);
 
-  async function updateWreath(wreathId: string, updates: { price?: number; visible?: boolean }) {
+  async function updateWreath(wreathId: string, updates: { title?: string; description?: string | null; price?: number; visible?: boolean }) {
     // @ts-ignore - RLS types are overly strict
     const { error } = await supabase.from('wreaths').update(updates as any).eq('id', wreathId);
     if (!error) {
@@ -856,8 +877,10 @@ function WreathsEditor({ wreaths, onUpdate }: { wreaths: WreathType[]; onUpdate:
       return;
     }
 
+    const titleCase = newWreath.size.charAt(0).toUpperCase() + newWreath.size.slice(1);
     const { error } = await supabase.from('wreaths').insert({
       size: newWreath.size,
+      title: `${titleCase} Wreath`,
       price: newWreath.price,
       sort_order: newWreath.sortOrder,
       visible: true,
@@ -953,6 +976,26 @@ function WreathsEditor({ wreaths, onUpdate }: { wreaths: WreathType[]; onUpdate:
           </div>
           <div className="space-y-3">
             <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Title (shown to customers)</label>
+              <input
+                type="text"
+                value={wreath.title}
+                onChange={(e) => handleWreathChange(wreath.id, 'title', e.target.value)}
+                className="w-full px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                placeholder="e.g., Premium Holiday Wreath"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+              <textarea
+                value={wreath.description || ''}
+                onChange={(e) => handleWreathChange(wreath.id, 'description', e.target.value)}
+                className="w-full px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                rows={2}
+                placeholder="Describe the wreath..."
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Price ($)</label>
               <input
                 type="number"
@@ -966,7 +1009,7 @@ function WreathsEditor({ wreaths, onUpdate }: { wreaths: WreathType[]; onUpdate:
               onClick={() => {
                 const currentWreath = editedWreaths.find(w => w.id === wreath.id);
                 if (currentWreath) {
-                  updateWreath(wreath.id, { price: currentWreath.price });
+                  updateWreath(wreath.id, { title: currentWreath.title, description: currentWreath.description, price: currentWreath.price });
                 }
               }}
               className="w-full px-4 py-2 bg-primary-700 text-white  hover:bg-primary-800 rounded transition-colors flex items-center justify-center gap-2 font-medium"

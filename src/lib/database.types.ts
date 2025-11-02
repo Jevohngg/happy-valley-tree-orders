@@ -187,6 +187,8 @@ export interface Database {
         Row: {
           id: string
           name: string
+          title: string
+          description: string | null
           price: number
           fits_up_to_feet: number | null
           visible: boolean
@@ -197,6 +199,8 @@ export interface Database {
         Insert: {
           id?: string
           name: string
+          title?: string
+          description?: string | null
           price: number
           fits_up_to_feet?: number | null
           visible?: boolean
@@ -207,6 +211,8 @@ export interface Database {
         Update: {
           id?: string
           name?: string
+          title?: string
+          description?: string | null
           price?: number
           fits_up_to_feet?: number | null
           visible?: boolean
@@ -219,6 +225,8 @@ export interface Database {
         Row: {
           id: string
           size: 'small' | 'medium' | 'large'
+          title: string
+          description: string | null
           price: number
           visible: boolean
           sort_order: number
@@ -228,6 +236,8 @@ export interface Database {
         Insert: {
           id?: string
           size: 'small' | 'medium' | 'large'
+          title?: string
+          description?: string | null
           price: number
           visible?: boolean
           sort_order?: number
@@ -237,6 +247,8 @@ export interface Database {
         Update: {
           id?: string
           size?: 'small' | 'medium' | 'large'
+          title?: string
+          description?: string | null
           price?: number
           visible?: boolean
           sort_order?: number

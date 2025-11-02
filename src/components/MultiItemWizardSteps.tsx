@@ -154,9 +154,14 @@ export function StandStep({ existingStands, onUpdate }: StandStepProps) {
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className="flex-1">
-                      <div className="font-semibold text-slate-900">{stand.name}</div>
-                      {stand.fits_up_to_feet && (
+                      <div className="font-semibold text-slate-900">{stand.title}</div>
+                      {stand.description && (
                         <div className="text-sm text-slate-600 mt-1">
+                          {stand.description}
+                        </div>
+                      )}
+                      {stand.fits_up_to_feet && (
+                        <div className="text-xs text-slate-500 mt-0.5">
                           Fits trees up to {stand.fits_up_to_feet} feet
                         </div>
                       )}
@@ -316,7 +321,7 @@ export function AddonsStep({ existingWreaths, onUpdate }: AddonsStepProps) {
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <div className="font-semibold text-slate-900">{wreath.size}</div>
+                        <div className="font-semibold text-slate-900">{wreath.title}</div>
                         {wreath.description && (
                           <div className="text-sm text-slate-600 mt-1">{wreath.description}</div>
                         )}
