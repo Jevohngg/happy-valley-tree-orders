@@ -10,9 +10,9 @@ export function AdminRoute() {
       <AdminPanel />
       <button
         onClick={() => navigate('/')}
-        className="fixed bottom-6 right-6 px-6 py-3 bg-slate-700 text-white font-semibold rounded-lg shadow-lg hover:bg-slate-800 transition-colors flex items-center gap-2 z-50"
+        className="fixed top-4 right-4 px-3 py-2 bg-slate-700 text-white font-medium text-sm rounded-lg shadow-lg hover:bg-slate-800 transition-colors flex items-center gap-2 z-50"
       >
-        <Home className="w-5 h-5" />
+        <Home className="w-4 h-4" />
         View Store
       </button>
     </div>
