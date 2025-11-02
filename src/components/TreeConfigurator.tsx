@@ -168,34 +168,36 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <div className="relative bg-slate-50 border border-slate-200 rounded overflow-hidden aspect-square">
-              {currentVariant && (
-                <img
-                  src={currentVariant.image_url}
-                  alt={`${currentSpecies.name} - ${selectedFullness}`}
-                  className="w-full h-full object-contain"
-                />
-              )}
+            <div>
+              <div className="relative bg-slate-50 border border-slate-200 rounded-t overflow-hidden aspect-square">
+                {currentVariant && (
+                  <img
+                    src={currentVariant.image_url}
+                    alt={`${currentSpecies.name} - ${selectedFullness}`}
+                    className="w-full h-full object-contain"
+                  />
+                )}
 
-              <button
-                onClick={goToPrevious}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
-              >
-                <ChevronLeft className="w-6 h-6 text-slate-900" />
-              </button>
+                <button
+                  onClick={goToPrevious}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-slate-900" />
+                </button>
 
-              <button
-                onClick={goToNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
-              >
-                <ChevronRight className="w-6 h-6 text-slate-900" />
-              </button>
-            </div>
+                <button
+                  onClick={goToNext}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-slate-900" />
+                </button>
+              </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2.5">
-              <p className="text-xs text-amber-900 leading-relaxed">
-                <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally, but we’ll match your preferences as closely as possible.
-              </p>
+              <div className="bg-amber-50 border-x border-b border-amber-200 rounded-b px-2.5 py-1.5">
+                <p className="text-[10px] text-amber-900 leading-snug">
+                  <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally. We'll match your preferences based on availability.
+                </p>
+              </div>
             </div>
 
             <div className="text-slate-600 text-sm leading-relaxed">
