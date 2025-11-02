@@ -151,7 +151,7 @@ ${orderDetails.notes ? `\n━━━━━━━━━━━━━━━━━━
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Happy Valley Christmas Trees <orders@happyvalleytrees.com>',
+        from: 'Happy Valley Christmas Trees <orders@orders.happyvalleychristmastrees.com>',
         to: ['happyvalleychristmastrees@gmail.com'],
         subject: `New Order #${orderDetails.orderNumber} - ${orderDetails.customerName}`,
         text: emailBody,
