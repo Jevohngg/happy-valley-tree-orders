@@ -177,12 +177,6 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
                 />
               )}
 
-              <div className="absolute bottom-3 left-3 right-3 bg-amber-50 border border-amber-200 rounded px-3 py-2 shadow-sm">
-                <p className="text-xs text-amber-900 leading-relaxed">
-                  <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally. We'll do our best to match your preferences based on availability.
-                </p>
-              </div>
-
               <button
                 onClick={goToPrevious}
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
@@ -196,6 +190,12 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
               >
                 <ChevronRight className="w-6 h-6 text-slate-900" />
               </button>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2.5">
+              <p className="text-xs text-amber-900 leading-relaxed">
+                <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally. We'll do our best to match your preferences based on availability.
+              </p>
             </div>
 
             <div className="text-slate-600 text-sm leading-relaxed">
