@@ -193,8 +193,8 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
                 </button>
               </div>
 
-              <div className="bg-amber-50 border-x border-b border-amber-200 rounded-b px-2.5 py-1.5">
-                <p className="text-[10px] text-amber-900 leading-snug">
+              <div className="bg-amber-50 border-x border-b border-amber-200 rounded-b px-2.5 py-1">
+                <p className="text-[10px] text-amber-900 leading-tight">
                   <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally. We'll match your preferences based on availability.
                 </p>
               </div>
