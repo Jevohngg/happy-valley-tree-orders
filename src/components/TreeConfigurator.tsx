@@ -194,7 +194,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
             <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2.5">
               <p className="text-xs text-amber-900 leading-relaxed">
-                <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally. We'll do our best to match your preferences based on availability.
+                <span className="font-semibold">Image for reference only.</span> Actual trees vary naturally, but we’ll match your preferences as closely as possible.
               </p>
             </div>
 
