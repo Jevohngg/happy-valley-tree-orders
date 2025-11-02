@@ -422,6 +422,10 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
                 <div className="font-semibold text-slate-900 mb-1">Accepted Payment Methods</div>
                 <p>We accept cash or Venmo payments at the time of delivery.</p>
               </div>
+              <div>
+                <div className="font-semibold text-slate-900 mb-1">Have Questions?</div>
+                <p>Contact us at (801)-244-9156</p>
+              </div>
             </div>
 
             <button
