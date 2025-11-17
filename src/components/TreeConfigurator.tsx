@@ -6,7 +6,6 @@ import { TreeItem } from '../App';
 
 type Species = Database['public']['Tables']['species']['Row'];
 type SpeciesHeight = Database['public']['Tables']['species_heights']['Row'];
-type FullnessVariant = Database['public']['Tables']['fullness_variants']['Row'];
 
 interface ConfiguratorProps {
   existingTrees: TreeItem[];
@@ -52,30 +51,22 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   async function loadHeightsAndPrice(speciesId: string) {
     setImageLoading(true);
 
-    const [variantsRes, heightsRes] = await Promise.all([
-      supabase
-        .from('fullness_variants')
-        .select('*')
-        .eq('species_id', speciesId)
-        .eq('available', true)
-        .order('fullness_type'),
-      supabase
-        .from('species_heights')
-        .select('*')
-        .eq('species_id', speciesId)
-        .eq('available', true)
-        .order('height_feet'),
-    ]);
-
-    if (variantsRes.data && variantsRes.data.length > 0) {
-      const mediumVariant = (variantsRes.data as any).find((v: any) => v.fullness_type === 'medium') || (variantsRes.data as any)[0];
-      setImageUrl(mediumVariant.image_url);
+    const currentSpecies = species.find(s => s.id === speciesId);
+    if (currentSpecies) {
+      setImageUrl((currentSpecies as any).image_url || '');
     }
 
-    if (heightsRes.data) {
-      setHeights(heightsRes.data as any);
-      if (heightsRes.data.length > 0) {
-        const defaultHeight = (heightsRes.data as any).find((h: any) => h.height_feet === 7) || (heightsRes.data as any)[0];
+    const { data: heightsData } = await supabase
+      .from('species_heights')
+      .select('*')
+      .eq('species_id', speciesId)
+      .eq('available', true)
+      .order('height_feet');
+
+    if (heightsData) {
+      setHeights(heightsData as any);
+      if (heightsData.length > 0) {
+        const defaultHeight = (heightsData as any).find((h: any) => h.height_feet === 7) || (heightsData as any)[0];
         setSelectedHeight(defaultHeight.height_feet);
         setPricePerFoot(defaultHeight.price_per_foot || 0);
       }

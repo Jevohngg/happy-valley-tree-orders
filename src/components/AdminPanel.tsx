@@ -130,44 +130,29 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
 
 function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: () => void }) {
   const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
-  const [variants, setVariants] = useState<FullnessVariant[]>([]);
   const [heights, setHeights] = useState<SpeciesHeight[]>([]);
   const [savedHeight, setSavedHeight] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddHeightForm, setShowAddHeightForm] = useState(false);
   const [newHeight, setNewHeight] = useState<number>(6);
   const [newHeightPrice, setNewHeightPrice] = useState<number>(0);
-  const [newSpecies, setNewSpecies] = useState({ name: '', description: '', sortOrder: 0 });
-  const [editedSpeciesData, setEditedSpeciesData] = useState<{ name: string; description: string } | null>(null);
+  const [newSpecies, setNewSpecies] = useState({ name: '', description: '', imageUrl: '', sortOrder: 0 });
+  const [editedSpeciesData, setEditedSpeciesData] = useState<{ name: string; description: string; imageUrl: string } | null>(null);
   const [savedSpecies, setSavedSpecies] = useState(false);
-  const [defaultImage, setDefaultImage] = useState<string>('');
 
   useEffect(() => {
     if (selectedSpecies) {
-      loadVariants(selectedSpecies.id);
       loadHeights(selectedSpecies.id);
-      setEditedSpeciesData({ name: selectedSpecies.name, description: selectedSpecies.description });
+      setEditedSpeciesData({
+        name: selectedSpecies.name,
+        description: selectedSpecies.description,
+        imageUrl: (selectedSpecies as any).image_url || ''
+      });
     } else {
       setEditedSpeciesData(null);
-      setDefaultImage('');
     }
   }, [selectedSpecies]);
 
-  async function loadVariants(speciesId: string) {
-    const { data } = await supabase
-      .from('fullness_variants')
-      .select('*')
-      .eq('species_id', speciesId)
-      .order('fullness_type');
-
-    if (data) {
-      setVariants(data);
-      const mediumVariant = data.find(v => v.fullness_type === 'medium');
-      if (mediumVariant) {
-        setDefaultImage(mediumVariant.image_url);
-      }
-    }
-  }
 
   async function loadHeights(speciesId: string) {
     const { data } = await supabase
@@ -180,21 +165,22 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
   }
 
   async function updateDefaultImage(imageUrl: string) {
-    if (!selectedSpecies) return;
+    if (!selectedSpecies || !editedSpeciesData) return;
 
-    const mediumVariant = variants.find(v => v.fullness_type === 'medium');
-    if (!mediumVariant) return;
-
-    // @ts-ignore - RLS types are overly strict
-    const { error } = await supabase.from('fullness_variants').update({ image_url: imageUrl } as any).eq('id', mediumVariant.id);
+    const { error } = await supabase
+      .from('species')
+      .update({ image_url: imageUrl })
+      .eq('id', selectedSpecies.id);
 
     if (error) {
       alert('Failed to save image: ' + error.message);
       return;
     }
 
-    setDefaultImage(imageUrl);
-    await loadVariants(selectedSpecies.id);
+    setEditedSpeciesData({ ...editedSpeciesData, imageUrl });
+    setSavedSpecies(true);
+    setTimeout(() => setSavedSpecies(false), 2000);
+    onUpdate();
   }
 
   async function addSpecies() {
@@ -208,6 +194,7 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       .insert({
         name: newSpecies.name,
         description: newSpecies.description,
+        image_url: newSpecies.imageUrl,
         sort_order: newSpecies.sortOrder,
         visible: true,
       })
@@ -217,18 +204,6 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
     if (speciesError || !insertedSpecies) {
       alert('Failed to create species: ' + speciesError?.message);
       return;
-    }
-
-    const variantsToInsert = [
-      { species_id: insertedSpecies.id, fullness_type: 'thin', image_url: '', price_per_foot: 0, available: false },
-      { species_id: insertedSpecies.id, fullness_type: 'medium', image_url: '', price_per_foot: 0, available: false },
-      { species_id: insertedSpecies.id, fullness_type: 'full', image_url: '', price_per_foot: 0, available: false },
-    ];
-
-    const { error: variantsError } = await supabase.from('fullness_variants').insert(variantsToInsert);
-
-    if (variantsError) {
-      alert('Species created but failed to create variants: ' + variantsError.message);
     }
 
     const heightsToInsert = [5, 6, 7, 8, 9, 10].map(height => ({
@@ -243,7 +218,7 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       alert('Species created but failed to create heights: ' + heightsError.message);
     }
 
-    setNewSpecies({ name: '', description: '', sortOrder: 0 });
+    setNewSpecies({ name: '', description: '', imageUrl: '', sortOrder: 0 });
     setShowAddForm(false);
     onUpdate();
   }
@@ -260,7 +235,8 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       .from('species')
       .update({
         name: editedSpeciesData.name,
-        description: editedSpeciesData.description
+        description: editedSpeciesData.description,
+        image_url: editedSpeciesData.imageUrl
       })
       .eq('id', selectedSpecies.id);
 
@@ -383,6 +359,16 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+                <input
+                  type="text"
+                  value={newSpecies.imageUrl}
+                  onChange={(e) => setNewSpecies({ ...newSpecies, imageUrl: e.target.value })}
+                  className="w-full px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Sort Order</label>
                 <input
                   type="number"
@@ -475,19 +461,19 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
               </div>
 
               <div className="bg-slate-50 rounded p-4 space-y-3">
-                <h3 className="text-base font-semibold text-slate-900">Default Tree Image</h3>
+                <h3 className="text-base font-semibold text-slate-900">Tree Image</h3>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      value={defaultImage}
-                      onChange={(e) => setDefaultImage(e.target.value)}
+                      value={editedSpeciesData.imageUrl}
+                      onChange={(e) => setEditedSpeciesData({ ...editedSpeciesData, imageUrl: e.target.value })}
                       className="flex-1 px-3 py-2 border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                       placeholder="https://..."
                     />
                     <button
-                      onClick={() => updateDefaultImage(defaultImage)}
+                      onClick={() => updateDefaultImage(editedSpeciesData.imageUrl)}
                       className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
                     >
                       <Save className="w-4 h-4" />
@@ -495,8 +481,8 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                     </button>
                   </div>
                 </div>
-                {defaultImage && !defaultImage.includes('placeholder') && (
-                  <img src={defaultImage} alt={selectedSpecies.name} className="w-full h-48 object-contain border rounded border-slate-200" />
+                {editedSpeciesData.imageUrl && editedSpeciesData.imageUrl.trim() !== '' && (
+                  <img src={editedSpeciesData.imageUrl} alt={selectedSpecies.name} className="w-full h-48 object-contain border rounded border-slate-200" />
                 )}
               </div>
 

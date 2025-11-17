@@ -104,6 +104,7 @@ export interface Database {
           id: string
           name: string
           description: string
+          image_url: string
           sort_order: number
           visible: boolean
           created_at: string
@@ -113,6 +114,7 @@ export interface Database {
           id?: string
           name: string
           description?: string
+          image_url?: string
           sort_order?: number
           visible?: boolean
           created_at?: string
@@ -122,6 +124,7 @@ export interface Database {
           id?: string
           name?: string
           description?: string
+          image_url?: string
           sort_order?: number
           visible?: boolean
           created_at?: string
@@ -165,6 +168,7 @@ export interface Database {
           id: string
           species_id: string
           height_feet: number
+          price_per_foot: number
           available: boolean
           created_at: string
         }
@@ -172,6 +176,7 @@ export interface Database {
           id?: string
           species_id: string
           height_feet: number
+          price_per_foot?: number
           available?: boolean
           created_at?: string
         }
@@ -179,6 +184,7 @@ export interface Database {
           id?: string
           species_id?: string
           height_feet?: number
+          price_per_foot?: number
           available?: boolean
           created_at?: string
         }
