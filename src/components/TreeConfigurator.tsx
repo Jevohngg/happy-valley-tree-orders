@@ -23,6 +23,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   const [quantity, setQuantity] = useState<number>(1);
   const [freshCut, setFreshCut] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [imageLoading, setImageLoading] = useState(true);
   const [cart, setCart] = useState<TreeItem[]>(existingTrees);
 
   useEffect(() => {
@@ -49,6 +50,8 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   }
 
   async function loadHeightsAndPrice(speciesId: string) {
+    setImageLoading(true);
+
     const [variantsRes, heightsRes] = await Promise.all([
       supabase
         .from('fullness_variants')
@@ -160,24 +163,34 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
           <div className="space-y-4">
             <div>
               <div className="relative bg-slate-50 border border-slate-200 rounded-t overflow-hidden aspect-square">
+                {imageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-slate-300 border-t-primary-700 rounded-full animate-spin"></div>
+                  </div>
+                )}
+
                 {imageUrl && (
                   <img
                     src={imageUrl}
                     alt={currentSpecies.name}
-                    className="w-full h-full object-contain"
+                    className={`w-full h-full object-contain transition-opacity duration-300 ${
+                      imageLoading ? 'opacity-0' : 'opacity-100'
+                    }`}
+                    onLoad={() => setImageLoading(false)}
+                    onError={() => setImageLoading(false)}
                   />
                 )}
 
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors z-10"
                 >
                   <ChevronLeft className="w-6 h-6 text-slate-900" />
                 </button>
 
                 <button
                   onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-3 bg-white rounded-full shadow-lg hover:bg-slate-50 transition-colors z-10"
                 >
                   <ChevronRight className="w-6 h-6 text-slate-900" />
                 </button>
