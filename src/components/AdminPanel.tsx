@@ -584,14 +584,18 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                           type="number"
                           min="0"
                           step="0.01"
-                          value={height.price_per_foot || 0}
+                          value={height.price_per_foot || ''}
                           onChange={(e) => {
+                            const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
                             const newHeights = heights.map(h =>
-                              h.id === height.id ? { ...h, price_per_foot: parseFloat(e.target.value) } : h
+                              h.id === height.id ? { ...h, price_per_foot: value } : h
                             );
                             setHeights(newHeights);
                           }}
-                          onBlur={(e) => updateHeight(height.id, { price_per_foot: parseFloat(e.target.value) })}
+                          onBlur={(e) => {
+                            const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
+                            updateHeight(height.id, { price_per_foot: value });
+                          }}
                           className="flex-1 px-2 py-1 text-sm border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                           placeholder="Price/ft"
                         />
