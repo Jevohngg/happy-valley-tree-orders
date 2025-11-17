@@ -460,31 +460,33 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                 )}
               </div>
 
-              <div className="bg-slate-50 rounded p-4 space-y-3">
-                <h3 className="text-base font-semibold text-slate-900">Tree Image</h3>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={editedSpeciesData.imageUrl}
-                      onChange={(e) => setEditedSpeciesData({ ...editedSpeciesData, imageUrl: e.target.value })}
-                      className="flex-1 px-3 py-2 border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      placeholder="https://..."
-                    />
-                    <button
-                      onClick={() => updateDefaultImage(editedSpeciesData.imageUrl)}
-                      className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
-                    >
-                      <Save className="w-4 h-4" />
-                      Save
-                    </button>
+              {editedSpeciesData && (
+                <div className="bg-slate-50 rounded p-4 space-y-3">
+                  <h3 className="text-base font-semibold text-slate-900">Tree Image</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={editedSpeciesData.imageUrl}
+                        onChange={(e) => setEditedSpeciesData({ ...editedSpeciesData, imageUrl: e.target.value })}
+                        className="flex-1 px-3 py-2 border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="https://..."
+                      />
+                      <button
+                        onClick={() => updateDefaultImage(editedSpeciesData.imageUrl)}
+                        className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
+                      >
+                        <Save className="w-4 h-4" />
+                        Save
+                      </button>
+                    </div>
                   </div>
+                  {editedSpeciesData.imageUrl && editedSpeciesData.imageUrl.trim() !== '' && (
+                    <img src={editedSpeciesData.imageUrl} alt={selectedSpecies.name} className="w-full h-48 object-contain border rounded border-slate-200" />
+                  )}
                 </div>
-                {editedSpeciesData.imageUrl && editedSpeciesData.imageUrl.trim() !== '' && (
-                  <img src={editedSpeciesData.imageUrl} alt={selectedSpecies.name} className="w-full h-48 object-contain border rounded border-slate-200" />
-                )}
-              </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-slate-900">Available Heights</h3>
