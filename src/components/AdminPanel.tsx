@@ -132,14 +132,15 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
   const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
   const [variants, setVariants] = useState<FullnessVariant[]>([]);
   const [heights, setHeights] = useState<SpeciesHeight[]>([]);
-  const [savedVariant, setSavedVariant] = useState<string | null>(null);
   const [savedHeight, setSavedHeight] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [showAddHeightForm, setShowAddHeightForm] = useState(false);
   const [newHeight, setNewHeight] = useState<number>(6);
+  const [newHeightPrice, setNewHeightPrice] = useState<number>(0);
   const [newSpecies, setNewSpecies] = useState({ name: '', description: '', sortOrder: 0 });
   const [editedSpeciesData, setEditedSpeciesData] = useState<{ name: string; description: string } | null>(null);
   const [savedSpecies, setSavedSpecies] = useState(false);
+  const [defaultImage, setDefaultImage] = useState<string>('');
 
   useEffect(() => {
     if (selectedSpecies) {
@@ -148,6 +149,7 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       setEditedSpeciesData({ name: selectedSpecies.name, description: selectedSpecies.description });
     } else {
       setEditedSpeciesData(null);
+      setDefaultImage('');
     }
   }, [selectedSpecies]);
 
@@ -158,7 +160,13 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       .eq('species_id', speciesId)
       .order('fullness_type');
 
-    if (data) setVariants(data);
+    if (data) {
+      setVariants(data);
+      const mediumVariant = data.find(v => v.fullness_type === 'medium');
+      if (mediumVariant) {
+        setDefaultImage(mediumVariant.image_url);
+      }
+    }
   }
 
   async function loadHeights(speciesId: string) {
@@ -171,24 +179,22 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
     if (data) setHeights(data);
   }
 
-  async function updateVariant(variantId: string, updates: { image_url?: string; price_per_foot?: number; available?: boolean }) {
-    console.log('Updating variant:', variantId, 'with:', updates);
+  async function updateDefaultImage(imageUrl: string) {
+    if (!selectedSpecies) return;
+
+    const mediumVariant = variants.find(v => v.fullness_type === 'medium');
+    if (!mediumVariant) return;
+
     // @ts-ignore - RLS types are overly strict
-    const { error, data } = await supabase.from('fullness_variants').update(updates as any).eq('id', variantId).select();
+    const { error } = await supabase.from('fullness_variants').update({ image_url: imageUrl } as any).eq('id', mediumVariant.id);
 
     if (error) {
-      console.error('Error updating variant:', error);
-      alert('Failed to save: ' + error.message);
+      alert('Failed to save image: ' + error.message);
       return;
     }
 
-    console.log('Update successful:', data);
-    setSavedVariant(variantId);
-    setTimeout(() => setSavedVariant(null), 2000);
-
-    if (selectedSpecies) {
-      await loadVariants(selectedSpecies.id);
-    }
+    setDefaultImage(imageUrl);
+    await loadVariants(selectedSpecies.id);
   }
 
   async function addSpecies() {
@@ -271,7 +277,6 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
   async function addHeight() {
     if (!selectedSpecies) return;
 
-    // Check if height already exists
     const exists = heights.some(h => h.height_feet === newHeight);
     if (exists) {
       alert('This height already exists for this species');
@@ -283,6 +288,7 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
       .insert({
         species_id: selectedSpecies.id,
         height_feet: newHeight,
+        price_per_foot: newHeightPrice,
         available: true
       });
 
@@ -293,10 +299,11 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
 
     setShowAddHeightForm(false);
     setNewHeight(6);
+    setNewHeightPrice(0);
     loadHeights(selectedSpecies.id);
   }
 
-  async function updateHeight(heightId: string, updates: { available?: boolean }) {
+  async function updateHeight(heightId: string, updates: { available?: boolean; price_per_foot?: number }) {
     const { error } = await supabase
       .from('species_heights')
       .update(updates)
@@ -337,7 +344,7 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
     <div className="space-y-4">
       <div className="bg-blue-50 border rounded border-blue-200 p-4 mb-6">
         <p className="text-sm text-blue-900">
-          <span className="font-semibold">Image Requirements:</span> Each species requires 3 separate images (one for Thin, Medium, and Full fullness). Upload high-quality images with white backgrounds showing the full tree.
+          <span className="font-semibold">Image & Pricing:</span> Each species requires a default tree image. Configure pricing per foot for each height option (e.g., 7ft trees at $20/ft, 8ft trees at $25/ft).
         </p>
       </div>
       <div className="grid md:grid-cols-2 gap-4">
@@ -467,92 +474,31 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                 )}
               </div>
 
-              <h3 className="text-base font-semibold text-slate-900">Fullness Variants</h3>
-              {variants.map((variant) => (
-                <div key={variant.id} className="bg-slate-50 rounded  p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-900 capitalize">{variant.fullness_type}</span>
-                      {savedVariant === variant.id && (
-                        <span className="flex items-center gap-1 text-xs text-primary-600 font-medium">
-                          <Check className="w-3 h-3" />
-                          Saved
-                        </span>
-                      )}
-                    </div>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={variant.available}
-                        onChange={(e) => updateVariant(variant.id, { available: e.target.checked })}
-                        className="rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span className="text-sm text-slate-600">Available</span>
-                    </label>
+              <div className="bg-slate-50 rounded p-4 space-y-3">
+                <h3 className="text-base font-semibold text-slate-900">Default Tree Image</h3>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={defaultImage}
+                      onChange={(e) => setDefaultImage(e.target.value)}
+                      className="flex-1 px-3 py-2 border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder="https://..."
+                    />
+                    <button
+                      onClick={() => updateDefaultImage(defaultImage)}
+                      className="px-4 py-2 bg-primary-700 text-white hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
+                    >
+                      <Save className="w-4 h-4" />
+                      Save
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Image URL</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={variant.image_url}
-                        onChange={(e) => {
-                          const newVariants = variants.map(v =>
-                            v.id === variant.id ? { ...v, image_url: e.target.value } : v
-                          );
-                          setVariants(newVariants);
-                        }}
-                        className="flex-1 px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="https://..."
-                      />
-                      <button
-                        onClick={() => {
-                          const currentVariant = variants.find(v => v.id === variant.id);
-                          if (currentVariant) {
-                            updateVariant(variant.id, { image_url: currentVariant.image_url });
-                          }
-                        }}
-                        className="px-4 py-2 bg-primary-700 text-white  hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Price per Foot ($)</label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={variant.price_per_foot}
-                        onChange={(e) => {
-                          const newVariants = variants.map(v =>
-                            v.id === variant.id ? { ...v, price_per_foot: parseFloat(e.target.value) } : v
-                          );
-                          setVariants(newVariants);
-                        }}
-                        className="flex-1 px-3 py-2 border rounded border-slate-300  focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                      />
-                      <button
-                        onClick={() => {
-                          const currentVariant = variants.find(v => v.id === variant.id);
-                          if (currentVariant) {
-                            updateVariant(variant.id, { price_per_foot: currentVariant.price_per_foot });
-                          }
-                        }}
-                        className="px-4 py-2 bg-primary-700 text-white  hover:bg-primary-800 rounded transition-colors flex items-center gap-2 font-medium"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save
-                      </button>
-                    </div>
-                  </div>
-                  {variant.image_url && !variant.image_url.includes('placeholder') && (
-                    <img src={variant.image_url} alt={`${selectedSpecies.name} ${variant.fullness_type}`} className="w-full h-48 object-cover " />
-                  )}
                 </div>
-              ))}
+                {defaultImage && !defaultImage.includes('placeholder') && (
+                  <img src={defaultImage} alt={selectedSpecies.name} className="w-full h-48 object-contain border rounded border-slate-200" />
+                )}
+              </div>
 
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-slate-900">Available Heights</h3>
@@ -580,6 +526,18 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                       placeholder="e.g., 6.5"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Price per Foot ($)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={newHeightPrice}
+                      onChange={(e) => setNewHeightPrice(parseFloat(e.target.value))}
+                      className="w-full px-3 py-1.5 text-sm border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder="e.g., 20.00"
+                    />
+                  </div>
                   <button
                     onClick={addHeight}
                     className="w-full px-3 py-1.5 bg-primary-700 text-white hover:bg-primary-800 transition-colors flex items-center justify-center gap-1.5 font-medium text-sm rounded"
@@ -590,43 +548,64 @@ function SpeciesEditor({ species, onUpdate }: { species: Species[]; onUpdate: ()
                 </div>
               )}
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+              <div className="space-y-3">
                 {heights.map((height) => (
                   <div
                     key={height.id}
-                    className={`border rounded p-2.5 transition-colors ${
+                    className={`border rounded p-3 transition-colors ${
                       height.available
                         ? 'bg-white border-slate-300'
                         : 'bg-slate-50 border-slate-200'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className={`font-semibold text-sm ${height.available ? 'text-slate-900' : 'text-slate-400'}`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`font-semibold ${height.available ? 'text-slate-900' : 'text-slate-400'}`}>
                         {height.height_feet} ft
                       </span>
-                      {savedHeight === height.id && (
-                        <span className="flex items-center gap-1 text-xs text-primary-600 font-medium">
-                          <Check className="w-3 h-3" />
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {savedHeight === height.id && (
+                          <span className="flex items-center gap-1 text-xs text-primary-600 font-medium">
+                            <Check className="w-3 h-3" />
+                          </span>
+                        )}
+                        <button
+                          onClick={() => deleteHeight(height.id)}
+                          className="text-red-600 hover:text-red-700 p-1"
+                          title="Delete height"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <label className="flex items-center gap-1 cursor-pointer flex-1">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4 text-slate-500" />
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={height.price_per_foot || 0}
+                          onChange={(e) => {
+                            const newHeights = heights.map(h =>
+                              h.id === height.id ? { ...h, price_per_foot: parseFloat(e.target.value) } : h
+                            );
+                            setHeights(newHeights);
+                          }}
+                          onBlur={(e) => updateHeight(height.id, { price_per_foot: parseFloat(e.target.value) })}
+                          className="flex-1 px-2 py-1 text-sm border rounded border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                          placeholder="Price/ft"
+                        />
+                        <span className="text-xs text-slate-600">/ft</span>
+                      </div>
+                      <label className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={height.available}
                           onChange={(e) => updateHeight(height.id, { available: e.target.checked })}
-                          className="w-3.5 h-3.5 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                          className="w-4 h-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                         />
-                        <span className="text-xs text-slate-600">Available</span>
+                        <span className="text-sm text-slate-600">Available for customers</span>
                       </label>
-                      <button
-                        onClick={() => deleteHeight(height.id)}
-                        className="text-red-600 hover:text-red-700 p-1"
-                        title="Delete height"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
                     </div>
                   </div>
                 ))}

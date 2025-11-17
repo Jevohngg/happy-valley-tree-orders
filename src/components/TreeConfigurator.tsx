@@ -66,7 +66,6 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
     if (variantsRes.data && variantsRes.data.length > 0) {
       const mediumVariant = (variantsRes.data as any).find((v: any) => v.fullness_type === 'medium') || (variantsRes.data as any)[0];
-      setPricePerFoot(mediumVariant.price_per_foot);
       setImageUrl(mediumVariant.image_url);
     }
 
@@ -75,6 +74,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
       if (heightsRes.data.length > 0) {
         const defaultHeight = (heightsRes.data as any).find((h: any) => h.height_feet === 7) || (heightsRes.data as any)[0];
         setSelectedHeight(defaultHeight.height_feet);
+        setPricePerFoot(defaultHeight.price_per_foot || 0);
       }
     }
   }
@@ -210,7 +210,10 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
                   {heights.map((height) => (
                     <button
                       key={height.id}
-                      onClick={() => setSelectedHeight(height.height_feet)}
+                      onClick={() => {
+                        setSelectedHeight(height.height_feet);
+                        setPricePerFoot(height.price_per_foot || 0);
+                      }}
                       className={`py-2 px-3 border rounded transition-colors text-sm font-medium ${
                         selectedHeight === height.height_feet
                           ? 'border-primary-800 bg-slate-50 text-slate-900'
