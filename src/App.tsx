@@ -19,7 +19,7 @@ type Step =
 export interface TreeItem {
   speciesId: string;
   speciesName: string;
-  fullness: 'thin' | 'medium' | 'full';
+  fullness: 'medium';
   height: number;
   pricePerFoot: number;
   unitPrice: number;

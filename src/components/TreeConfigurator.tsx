@@ -5,7 +5,6 @@ import { Database } from '../lib/database.types';
 import { TreeItem } from '../App';
 
 type Species = Database['public']['Tables']['species']['Row'];
-type FullnessVariant = Database['public']['Tables']['fullness_variants']['Row'];
 type SpeciesHeight = Database['public']['Tables']['species_heights']['Row'];
 
 interface ConfiguratorProps {
@@ -13,14 +12,11 @@ interface ConfiguratorProps {
   onUpdate: (trees: TreeItem[]) => void;
 }
 
-const FULLNESS_ORDER: ('thin' | 'medium' | 'full')[] = ['thin', 'medium', 'full'];
-
 export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps) {
   const [species, setSpecies] = useState<Species[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [variants, setVariants] = useState<FullnessVariant[]>([]);
   const [heights, setHeights] = useState<SpeciesHeight[]>([]);
-  const [selectedFullness, setSelectedFullness] = useState<'thin' | 'medium' | 'full'>('medium');
+  const [pricePerFoot, setPricePerFoot] = useState<number>(0);
   const [selectedHeight, setSelectedHeight] = useState<number>(7);
   const [quantity, setQuantity] = useState<number>(1);
   const [freshCut, setFreshCut] = useState<boolean>(false);
@@ -33,7 +29,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
   useEffect(() => {
     if (species.length > 0) {
-      loadVariantsAndHeights(species[currentIndex].id);
+      loadHeightsAndPrice(species[currentIndex].id);
     }
   }, [currentIndex, species]);
 
@@ -50,29 +46,18 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
     }
   }
 
-  async function loadVariantsAndHeights(speciesId: string) {
-    const [variantsRes, heightsRes] = await Promise.all([
-      supabase
-        .from('fullness_variants')
-        .select('*')
-        .eq('species_id', speciesId)
-        .eq('available', true)
-        .order('fullness_type'),
-      supabase
-        .from('species_heights')
-        .select('*')
-        .eq('species_id', speciesId)
-        .eq('available', true)
-        .order('height_feet'),
-    ]);
-
-    if (variantsRes.data) {
-      setVariants(variantsRes.data as any);
-      if (variantsRes.data.length > 0) {
-        const mediumVariant = (variantsRes.data as any).find((v: any) => v.fullness_type === 'medium');
-        setSelectedFullness((mediumVariant?.fullness_type || (variantsRes.data as any)[0].fullness_type) as 'thin' | 'medium' | 'full');
-      }
+  async function loadHeightsAndPrice(speciesId: string) {
+    const currentSpecies = species.find(s => s.id === speciesId);
+    if (currentSpecies) {
+      setPricePerFoot(currentSpecies.price_per_foot || 0);
     }
+
+    const heightsRes = await supabase
+      .from('species_heights')
+      .select('*')
+      .eq('species_id', speciesId)
+      .eq('available', true)
+      .order('height_feet');
 
     if (heightsRes.data) {
       setHeights(heightsRes.data as any);
@@ -93,21 +78,20 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
 
   function addToCart() {
     const currentSpecies = species[currentIndex];
-    const variant = variants.find(v => v.fullness_type === selectedFullness);
 
-    if (currentSpecies && variant) {
-      const unitPrice = variant.price_per_foot * selectedHeight;
+    if (currentSpecies && pricePerFoot > 0) {
+      const unitPrice = pricePerFoot * selectedHeight;
 
       const newTree: TreeItem = {
         speciesId: currentSpecies.id,
         speciesName: currentSpecies.name,
-        fullness: selectedFullness,
+        fullness: 'medium',
         height: selectedHeight,
-        pricePerFoot: variant.price_per_foot,
+        pricePerFoot: pricePerFoot,
         unitPrice,
         quantity,
         freshCut,
-        imageUrl: variant.image_url,
+        imageUrl: currentSpecies.image_url || '',
       };
 
       const newCart = [...cart, newTree];
@@ -149,15 +133,10 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   }
 
   const currentSpecies = species[currentIndex];
-  const currentVariant = variants.find(v => v.fullness_type === selectedFullness);
-  const treePrice = currentVariant ? currentVariant.price_per_foot * selectedHeight : 0;
+  const treePrice = pricePerFoot * selectedHeight;
   const totalPrice = treePrice * quantity;
   const cartTotal = cart.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const cartQuantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-  const sortedVariants = [...variants].sort((a, b) => {
-    return FULLNESS_ORDER.indexOf(a.fullness_type as any) - FULLNESS_ORDER.indexOf(b.fullness_type as any);
-  });
 
   return (
     <div className="min-h-screen bg-white pb-24">
@@ -170,10 +149,10 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
           <div className="space-y-4">
             <div>
               <div className="relative bg-slate-50 border border-slate-200 rounded-t overflow-hidden aspect-square">
-                {currentVariant && (
+                {currentSpecies.image_url && (
                   <img
-                    src={currentVariant.image_url}
-                    alt={`${currentSpecies.name} - ${selectedFullness}`}
+                    src={currentSpecies.image_url}
+                    alt={currentSpecies.name}
                     className="w-full h-full object-contain"
                   />
                 )}
@@ -208,30 +187,11 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
           <div className="space-y-4">
             <div className="bg-white border border-slate-200 rounded p-4 space-y-4">
               <div>
-                <label className="text-sm font-semibold text-slate-900 mb-2 block">Fullness</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {sortedVariants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setSelectedFullness(variant.fullness_type as 'thin' | 'medium' | 'full')}
-                      className={`py-2 px-3 border rounded transition-colors capitalize text-sm font-medium ${
-                        selectedFullness === variant.fullness_type
-                          ? 'border-primary-800 bg-slate-50 text-slate-900'
-                          : 'border-slate-300 hover:border-slate-400 text-slate-700'
-                      }`}
-                    >
-                      {variant.fullness_type}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
                 <label className="text-sm font-semibold text-slate-900 mb-2 block">
                   Height
-                  {currentVariant && (
+                  {pricePerFoot > 0 && (
                     <span className="ml-2 text-slate-600 font-normal text-xs">
-                      (${currentVariant.price_per_foot.toFixed(2)}/ft)
+                      (${pricePerFoot.toFixed(2)}/ft)
                     </span>
                   )}
                 </label>
@@ -321,7 +281,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <div className="font-semibold text-slate-900 truncate">
-                            {item.speciesName} - {item.height} ft ({item.fullness})
+                            {item.speciesName} - {item.height} ft
                           </div>
                           <div className="text-slate-600 mt-0.5">
                             Qty: {item.quantity} × ${item.unitPrice.toFixed(2)}

@@ -190,7 +190,7 @@ export function ReviewStep({ orderData, onConfirm, onSubmitReady, onSubmittingCh
                     <div key={index} className="flex justify-between items-start text-sm">
                       <div className="flex-1">
                         <div className="font-medium text-slate-900">
-                          {tree.speciesName} - {tree.height} ft ({tree.fullness})
+                          {tree.speciesName} - {tree.height} ft
                         </div>
                         <div className="text-slate-600">
                           ${tree.pricePerFoot.toFixed(2)}/ft × {tree.height} ft × {tree.quantity}
@@ -353,7 +353,7 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
                 <div className="text-xs space-y-1">
                   {orderData.trees.map((tree, index) => (
                     <div key={index} className="flex justify-between text-slate-700">
-                      <span>{tree.speciesName} {tree.height}ft ({tree.fullness}) × {tree.quantity}</span>
+                      <span>{tree.speciesName} {tree.height}ft × {tree.quantity}</span>
                       <span className="font-medium">${(tree.unitPrice * tree.quantity).toFixed(2)}</span>
                     </div>
                   ))}
@@ -417,7 +417,7 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
 
               <div>
                 <div className="font-semibold text-slate-900 mb-1">Tree Appearance & Availability</div>
-                <p>Every tree is unique. Shape, fullness, and overall appearance may vary based on seasonal availability and natural differences between trees. We'll always do our best to match your selected type and fullness as closely as possible.</p>
+                <p>Every tree is unique. Shape and overall appearance may vary based on seasonal availability and natural differences between trees. We'll always do our best to match your selected type as closely as possible.</p>
               </div>
 
               <div>

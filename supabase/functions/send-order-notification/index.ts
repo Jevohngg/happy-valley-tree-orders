@@ -53,7 +53,7 @@ Deno.serve(async (req: Request) => {
     const treesList = orderDetails.trees
       .map(
         (tree) =>
-          `  • ${tree.speciesName} - ${tree.height} ft (${tree.fullness}) × ${tree.quantity}${tree.freshCut ? ' - Fresh Cut' : ''}\n    $${tree.unitPrice.toFixed(2)} each = $${(tree.unitPrice * tree.quantity).toFixed(2)}`
+          `  • ${tree.speciesName} - ${tree.height} ft × ${tree.quantity}${tree.freshCut ? ' - Fresh Cut' : ''}\n    $${tree.unitPrice.toFixed(2)} each = $${(tree.unitPrice * tree.quantity).toFixed(2)}`
       )
       .join("\n");
 
