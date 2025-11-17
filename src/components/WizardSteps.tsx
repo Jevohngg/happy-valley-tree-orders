@@ -390,7 +390,17 @@ export function ScheduleStep({ schedule, onUpdate }: ScheduleStepProps) {
     onUpdate({ date: date || null, time: time || null });
   }, []);
 
+  function isWeekday(dateString: string): boolean {
+    const selectedDate = new Date(dateString + 'T00:00:00');
+    const dayOfWeek = selectedDate.getDay();
+    return dayOfWeek !== 0 && dayOfWeek !== 6;
+  }
+
   function handleDateChange(newDate: string) {
+    if (newDate && !isWeekday(newDate)) {
+      alert('Please select a weekday (Monday-Friday) for delivery.');
+      return;
+    }
     setDate(newDate);
     onUpdate({ date: newDate || null, time: time || null });
   }
@@ -406,9 +416,11 @@ export function ScheduleStep({ schedule, onUpdate }: ScheduleStepProps) {
     '4:00 PM - 8:00 PM',
   ];
 
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
+  const currentYear = new Date().getFullYear();
+  const minDate = new Date(currentYear, 10, 28);
+  const maxDate = new Date(currentYear, 11, 24);
   const minDateString = minDate.toISOString().split('T')[0];
+  const maxDateString = maxDate.toISOString().split('T')[0];
 
   return (
     <div className="min-h-screen bg-white pb-24">
@@ -419,12 +431,23 @@ export function ScheduleStep({ schedule, onUpdate }: ScheduleStepProps) {
             <p className="text-sm md:text-base text-slate-600">Choose your preferred delivery date and time</p>
           </div>
 
-          <div className="bg-amber-50 border rounded border-amber-200 p-4">
-            <div className="flex gap-2">
-              <Clock className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-900">
-                Preferred times are not guaranteed. We'll do our best to accommodate your request.
-              </p>
+          <div className="space-y-3">
+            <div className="bg-primary-50 border rounded border-primary-200 p-4">
+              <div className="flex gap-2">
+                <Calendar className="w-5 h-5 text-primary-700 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-primary-900">
+                  <p className="font-semibold mb-1">Delivery Season: November 28 - December 24</p>
+                  <p>Weekday deliveries only (Monday - Friday)</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-amber-50 border rounded border-amber-200 p-4">
+              <div className="flex gap-2">
+                <Clock className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-amber-900">
+                  Preferred times are not guaranteed. We'll do our best to accommodate your request.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -439,6 +462,7 @@ export function ScheduleStep({ schedule, onUpdate }: ScheduleStepProps) {
                 value={date}
                 onChange={(e) => handleDateChange(e.target.value)}
                 min={minDateString}
+                max={maxDateString}
                 className="w-full px-4 py-2.5 bg-white border rounded border-slate-300 text-slate-900 font-medium focus:ring-2 focus:ring-primary-600 focus:border-primary-600"
               />
             </div>
