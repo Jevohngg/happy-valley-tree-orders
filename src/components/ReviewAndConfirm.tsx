@@ -441,7 +441,10 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
             </div>
 
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                localStorage.removeItem('tree-order-session');
+                window.location.reload();
+              }}
               className="w-full py-2.5 bg-slate-800 text-white text-sm font-semibold hover:bg-slate-900 rounded-lg transition-colors"
             >
               Place Another Order

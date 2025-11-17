@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TreeConfigurator } from './components/TreeConfigurator';
 import { StandStep, AddonsStep } from './components/MultiItemWizardSteps';
 import { DeliveryStep, ScheduleStep, ContactStep } from './components/WizardSteps';
@@ -70,6 +70,8 @@ export interface OrderData {
   };
 }
 
+const STORAGE_KEY = 'tree-order-session';
+
 function App() {
   const [currentStep, setCurrentStep] = useState<Step>('tree');
   const [orderData, setOrderData] = useState<Partial<OrderData>>({
@@ -81,6 +83,28 @@ function App() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [reviewStepSubmit, setReviewStepSubmit] = useState<(() => void) | null>(null);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
+
+  useEffect(() => {
+    const savedSession = localStorage.getItem(STORAGE_KEY);
+    if (savedSession) {
+      try {
+        const { step, data } = JSON.parse(savedSession);
+        setCurrentStep(step);
+        setOrderData(data);
+      } catch (error) {
+        console.error('Error restoring session:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentStep !== 'confirmation') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        step: currentStep,
+        data: orderData
+      }));
+    }
+  }, [currentStep, orderData]);
 
   const stepOrder: Step[] = ['tree', 'stand', 'delivery', 'addons', 'schedule', 'contact', 'review'];
 
