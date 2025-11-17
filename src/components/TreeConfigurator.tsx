@@ -6,6 +6,7 @@ import { TreeItem } from '../App';
 
 type Species = Database['public']['Tables']['species']['Row'];
 type SpeciesHeight = Database['public']['Tables']['species_heights']['Row'];
+type FullnessVariant = Database['public']['Tables']['fullness_variants']['Row'];
 
 interface ConfiguratorProps {
   existingTrees: TreeItem[];
@@ -17,6 +18,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [heights, setHeights] = useState<SpeciesHeight[]>([]);
   const [pricePerFoot, setPricePerFoot] = useState<number>(0);
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [selectedHeight, setSelectedHeight] = useState<number>(7);
   const [quantity, setQuantity] = useState<number>(1);
   const [freshCut, setFreshCut] = useState<boolean>(false);
@@ -47,17 +49,26 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
   }
 
   async function loadHeightsAndPrice(speciesId: string) {
-    const currentSpecies = species.find(s => s.id === speciesId);
-    if (currentSpecies) {
-      setPricePerFoot(currentSpecies.price_per_foot || 0);
-    }
+    const [variantsRes, heightsRes] = await Promise.all([
+      supabase
+        .from('fullness_variants')
+        .select('*')
+        .eq('species_id', speciesId)
+        .eq('available', true)
+        .order('fullness_type'),
+      supabase
+        .from('species_heights')
+        .select('*')
+        .eq('species_id', speciesId)
+        .eq('available', true)
+        .order('height_feet'),
+    ]);
 
-    const heightsRes = await supabase
-      .from('species_heights')
-      .select('*')
-      .eq('species_id', speciesId)
-      .eq('available', true)
-      .order('height_feet');
+    if (variantsRes.data && variantsRes.data.length > 0) {
+      const mediumVariant = (variantsRes.data as any).find((v: any) => v.fullness_type === 'medium') || (variantsRes.data as any)[0];
+      setPricePerFoot(mediumVariant.price_per_foot);
+      setImageUrl(mediumVariant.image_url);
+    }
 
     if (heightsRes.data) {
       setHeights(heightsRes.data as any);
@@ -91,7 +102,7 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
         unitPrice,
         quantity,
         freshCut,
-        imageUrl: currentSpecies.image_url || '',
+        imageUrl: imageUrl,
       };
 
       const newCart = [...cart, newTree];
@@ -149,9 +160,9 @@ export function TreeConfigurator({ existingTrees, onUpdate }: ConfiguratorProps)
           <div className="space-y-4">
             <div>
               <div className="relative bg-slate-50 border border-slate-200 rounded-t overflow-hidden aspect-square">
-                {currentSpecies.image_url && (
+                {imageUrl && (
                   <img
-                    src={currentSpecies.image_url}
+                    src={imageUrl}
                     alt={currentSpecies.name}
                     className="w-full h-full object-contain"
                   />
