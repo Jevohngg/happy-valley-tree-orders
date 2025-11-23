@@ -58,7 +58,7 @@ export function StandStep({ existingStands, onUpdate }: StandStepProps) {
     } else {
       const newStandItem: StandItem = {
         id: stand.id,
-        name: stand.name,
+        title: stand.title,
         unitPrice: stand.price,
         quantity: newQuantity,
         hasOwn: false,
@@ -77,7 +77,7 @@ export function StandStep({ existingStands, onUpdate }: StandStepProps) {
     } else {
       const ownStandItem: StandItem = {
         id: null,
-        name: 'Own Stand',
+        title: 'Own Stand',
         unitPrice: 0,
         quantity: 1,
         hasOwn: true,
@@ -271,7 +271,7 @@ export function AddonsStep({ existingWreaths, onUpdate }: AddonsStepProps) {
     } else {
       const newWreathItem: WreathItem = {
         id: wreath.id,
-        size: wreath.size,
+        title: wreath.title,
         unitPrice: wreath.price,
         quantity: newQuantity,
       };

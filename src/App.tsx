@@ -30,7 +30,7 @@ export interface TreeItem {
 
 export interface StandItem {
   id: string | null;
-  name: string;
+  title: string;
   unitPrice: number;
   quantity: number;
   hasOwn: boolean;
@@ -38,7 +38,7 @@ export interface StandItem {
 
 export interface WreathItem {
   id: string;
-  size: string;
+  title: string;
   unitPrice: number;
   quantity: number;
 }
