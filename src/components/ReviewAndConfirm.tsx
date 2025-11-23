@@ -423,12 +423,12 @@ export function ConfirmationScreen({ orderNumber, orderData }: ConfirmationProps
 
               <div>
                 <div className="font-semibold text-slate-900 mb-1">Payment Terms</div>
-                <p>Payment is due upon delivery. The estimated total does not include gratuity for the delivery team.</p>
+                <p>Payment is due before delivery. Someone from our team will reach out to confirm the final price for your order and then send you a payment link for you to submit payment virtually </p>
               </div>
 
               <div>
                 <div className="font-semibold text-slate-900 mb-1">Accepted Payment Methods</div>
-                <p>We accept cash or Venmo payments at the time of delivery.</p>
+                <p>All major debit and credit cards. Tips for the delivery person are cash or Venmo only </p>
               </div>
               <div>
                 <div className="font-semibold text-slate-900 mb-1">Have Questions?</div>
